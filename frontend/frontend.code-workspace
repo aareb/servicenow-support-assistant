@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../servicenow_support_assistant"
+		},
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"github.copilot.chat.agentDebugLog.fileLogging.enabled": true
+	}
+}

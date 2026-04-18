@@ -1,0 +1,22 @@
+[
+  {
+    "description": "login page fails with error 500 after deploy",
+    "resolution": "Rollback the latest deployment and restart the authentication service"
+  },
+  {
+    "description": "database connection timeout in production",
+    "resolution": "Verify DB credentials, restart the DB pool, and check network access rules"
+  },
+  {
+    "description": "email notifications are not being sent",
+    "resolution": "Check SMTP server status and restart the email queue service"
+  },
+  {
+    "description": "application slow response on checkout page",
+    "resolution": "Scale application instances and clear the application cache"
+  },
+  {
+    "description": "service endpoint returns 503 intermittently",
+    "resolution": "Investigate backend service health and restart the failing service"
+  }
+]

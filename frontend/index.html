@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 16px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #1a202c;
+    }
+    #chat {
+      min-height: 320px;
+      border: 1px solid #d2d6dc;
+      border-radius: 10px;
+      padding: 18px;
+      background: #f8fafc;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .message {
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .message.user {
+      text-align: right;
+    }
+    .message.bot {
+      text-align: left;
+    }
+    .message span {
+      display: inline-block;
+      padding: 12px 14px;
+      border-radius: 14px;
+      max-width: 90%;
+    }
+    .message.user span {
+      background: #3182ce;
+      color: white;
+    }
+    .message.bot span {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    input {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      border: none;
+      background: #2b6cb0;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ServiceNow Support Assistant</h2>
+    <div id="chat"></div>
+    <div class="input-row">
+      <input id="msg" placeholder="Type your issue here..." autocomplete="off" />
+      <button id="sendBtn" onclick="send()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatEl = document.getElementById("chat");
+    const msgEl = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+
+    msgEl.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        send();
+      }
+    });
+
+    function addMessage(role, text) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `message ${role}`;
+      const bubble = document.createElement("span");
+      bubble.textContent = text;
+      wrapper.appendChild(bubble);
+      chatEl.appendChild(wrapper);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      addMessage("bot", "Hello! I can help you diagnose the issue and create a ServiceNow incident. Please describe the problem you are seeing.");
+    });
+
+    async function send() {
+      const message = msgEl.value.trim();
+      if (!message) return;
+      addMessage("user", message);
+      msgEl.value = "";
+      sendBtn.disabled = true;
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({user_id: "webuser", message}),
+        });
+        const data = await response.json();
+        addMessage("bot", data.reply);
+      } catch (error) {
+        addMessage("bot", "Unable to reach the bot. Please try again.");
+      } finally {
+        sendBtn.disabled = false;
+        msgEl.focus();
+      }
+    }
+  </script>
+</body>
+</html>
