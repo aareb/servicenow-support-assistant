@@ -24,7 +24,7 @@ The backend returns JSON with a `reply` field. Example:
 
 ```json
 {
-  "reply": "✅ Incident INC-0001 created\n🚨 Priority: P1\n..."
+  "reply": "Incident INC-0001 created\n Priority: P1\n..."
 }
 ```
 
