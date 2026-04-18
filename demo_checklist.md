@@ -5,9 +5,9 @@
 -  Navigate to `Support-assisstant/backend`
 -  Run `pip install -r requirements.txt`
 -  Copy `.env.example` to `.env` and configure:
-  -  `SN_INSTANCE_URL` (optional for mock mode)
-  -  `SN_USER` and `SN_PASS` (optional)
-  -  `OPENAI_API_KEY` (optional for AI summarization)
+  - `SN_INSTANCE_URL` (optional for mock mode)
+  - `SN_USER` and `SN_PASS` (optional)
+  - `OPENAI_API_KEY` (optional for AI summarization)
 -  Start backend: `uvicorn main:app --reload`
 -  Open browser to `http://127.0.0.1:8000`
 
