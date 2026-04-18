@@ -50,9 +50,9 @@ def chat_handler(payload):
 
         return {
             "reply": (
-                f"✅ Incident {incident_number} created\n"
-                f"🚨 Priority: {priority}\n\n"
-                f"🔍 Diagnosis summary:\n"
+                f" Incident {incident_number} created\n"
+                f" Priority: {priority}\n\n"
+                f" Diagnosis summary:\n"
                 f"Issue: {session.description}\n"
                 f"Symptoms: {session.symptoms}\n\n"
                 f"🔧 Recommended mitigation:\n{mitigation}\n\n"
