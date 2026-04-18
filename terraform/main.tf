@@ -104,12 +104,16 @@ resource "aws_ecr_repository" "backend" {
 
 resource "aws_s3_bucket" "frontend" {
   bucket = var.frontend_bucket_name != "" ? var.frontend_bucket_name : "${var.environment}-support-assistant-frontend-${data.aws_caller_identity.current.account_id}"
-  acl    = "private"
   force_destroy = true
 
   tags = {
     Name = "${var.environment}-frontend"
   }
+}
+
+resource "aws_s3_bucket_acl" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
@@ -462,7 +466,7 @@ resource "aws_db_instance" "main" {
   engine              = var.db_engine
   instance_class      = var.db_instance_class
   allocated_storage   = var.db_allocated_storage
-  name                = var.db_name
+  db_name             = var.db_name
   username            = var.db_username
   password            = random_password.db[0].result
   db_subnet_group_name = aws_db_subnet_group.main[0].name
@@ -522,7 +526,7 @@ resource "aws_secretsmanager_secret_version" "openai_api_url" {
   secret_string = var.openai_api_url
 }
 
-resource "aws_s3_bucket_object" "frontend_index" {
+resource "aws_s3_object" "frontend_index" {
   bucket = aws_s3_bucket.frontend.id
   key    = "index.html"
   source = "../frontend/index.html"
