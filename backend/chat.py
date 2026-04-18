@@ -55,7 +55,7 @@ def chat_handler(payload):
                 f" Diagnosis summary:\n"
                 f"Issue: {session.description}\n"
                 f"Symptoms: {session.symptoms}\n\n"
-                f"🔧 Recommended mitigation:\n{mitigation}\n\n"
+                f" Recommended mitigation:\n{mitigation}\n\n"
                 "If you want to log another issue, type 'reset'."
             )
         }
