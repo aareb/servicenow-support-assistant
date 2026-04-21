@@ -1,0 +1,28 @@
+name: PR Review with AI & DevSecOps
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  cursor-pr-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Cursor PR Review
+        uses: cursor-sh/action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Optionally configure additional Cursor options here
+
+  ai-devsecops-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run OpenAI DevSecOps Review
+        uses: openai/openai-devsecops-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          review_permissions: true
+          review_diff: true
+          review_security: true

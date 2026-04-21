@@ -38,7 +38,7 @@ def chat_handler(payload):
 
         priority = calculate_priority(session)
         similar = find_similar_tickets(session.description, session.symptoms)
-        mitigation = summarize(similar)
+        mitigation = summarize(similar, description=f"{session.description} {session.symptoms or ''}")
 
         incident_number = create_incident(
             session.description,

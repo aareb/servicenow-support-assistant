@@ -1,0 +1,11 @@
+# This file defines code owners for automatic PR reviewer assignment.
+# Format: path pattern  @github-username or @org/team
+
+# Assign all code to the core team by default
+*       @your-org/core-team
+
+# Example: Assign backend code to backend team
+/Support-assisstant/backend/   @your-org/backend-team
+
+# Example: Assign frontend code to frontend team
+/Support-assisstant/frontend/  @your-org/frontend-team

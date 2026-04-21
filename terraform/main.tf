@@ -109,7 +109,7 @@ resource "aws_s3_bucket" "frontend" {
   tags = {
     Name = "${var.environment}-frontend"
   }
-
+}
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
   bucket = aws_s3_bucket.frontend.id

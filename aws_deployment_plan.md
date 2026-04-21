@@ -1,6 +1,12 @@
 # AWS Deployment Plan for ServiceNow Support Assistant Accelerator
 
-This plan uses AWS ECS/Fargate for the backend, S3 + CloudFront for the frontend, RDS or DynamoDB for session persistence, and Secrets Manager for secure credentials.
+
+This plan uses AWS ECS/Fargate for the backend, S3 + CloudFront for the frontend, RDS or DynamoDB for session persistence, and Secrets Manager for secure credentials. The solution now includes:
+
+- Prioritized ticket dashboard in the frontend (OpenAI-powered)
+- /tickets/prioritized API endpoint for ticket triage and mitigation
+- Automated CI/CD with GitHub Actions and Terraform
+
 
 ## Architecture Overview
 
@@ -10,6 +16,9 @@ This plan uses AWS ECS/Fargate for the backend, S3 + CloudFront for the frontend
 - secrets stored in **AWS Secrets Manager**
 - backend environment variables injected into ECS task definitions
 - logs written to **Amazon CloudWatch Logs**
+- **Prioritized ticket dashboard**: OpenAI LLM ranks and explains open ServiceNow tickets, generates mitigation plans
+- **/tickets/prioritized** API endpoint for frontend and integrations
+- **CI/CD**: GitHub Actions workflow for build, deploy, and infrastructure
 
 ## Service Choices
 
@@ -47,37 +56,22 @@ Choose one:
 - **Amazon CloudWatch Logs** for ECS task output
 - optional **CloudWatch Alarms** for error rates / task failures
 
+
 ## Deployment Steps
 
-### A. Build and push Docker image
-1. Create an ECR repository:
-   - `aws ecr create-repository --repository-name servicenow-support-assistant`
-2. Authenticate Docker to ECR:
-   - `aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com`
-3. Build the Docker image from `Support-assisstant`:
-   - `docker build -t servicenow-support-assistant -f backend/Dockerfile .`
-4. Tag and push:
-   - `docker tag servicenow-support-assistant:latest <account-id>.dkr.ecr.<region>.amazonaws.com/servicenow-support-assistant:latest`
-   - `docker push <account-id>.dkr.ecr.<region>.amazonaws.com/servicenow-support-assistant:latest`
+### A. CI/CD Pipeline (Recommended)
+1. Configure GitHub repository secrets for AWS credentials and resource names.
+2. Edit `.github/workflows/deploy.yml` with your ECR repo, S3 bucket, and CloudFront distribution ID.
+3. On every push to `main`, the workflow will:
+   - Build and push backend Docker image to ECR
+   - Apply Terraform to provision/update AWS infrastructure
+   - Sync frontend to S3 and invalidate CloudFront
 
-### B. Create or provision session storage
-
-#### Option 1: RDS (recommended for relational sessions)
-1. Create an RDS PostgreSQL or MySQL instance in a private subnet.
-2. Configure security groups to allow ECS tasks access.
-3. Store DB connection details as Secrets Manager secrets or SSM parameters.
-4. Update session handling code to use Postgres/MySQL instead of SQLite.
-
-#### Option 2: DynamoDB (serverless sessions)
-1. Create a DynamoDB table, e.g. `SupportAssistantSessions`.
-2. Use a primary key like `user_id`.
-3. Grant ECS task role access to DynamoDB.
-4. Update session code to read/write DynamoDB.
-
-### C. Configure AWS Secrets Manager
-1. Create a secret for ServiceNow and OpenAI values.
-2. Example secret name: `/support-assistant/credentials`
-3. Include JSON keys:
+### B. Manual Steps (if not using CI/CD)
+1. Build and push Docker image (see previous instructions)
+2. Provision session storage (RDS or DynamoDB)
+3. Configure AWS Secrets Manager for ServiceNow and OpenAI credentials
+4. Deploy frontend to S3 and invalidate CloudFront
    - `SN_INSTANCE_URL`
    - `SN_USER`
    - `SN_PASS`

@@ -1,25 +1,26 @@
 # ServiceNow Support Assistant
 
 ## Overview
-This project implements a FastAPI backend and a simple browser chat UI for a ServiceNow-style support bot. The bot:
-- collects issue description
-- asks whether the issue impacts production
-- asks for the affected application/CI
-- calculates priority
-- looks up similar historical ticket mitigations
-- creates a ServiceNow incident (or returns a mock incident ID if credentials are missing)
 
-It also includes AI summarization support for mitigation guidance using OpenAI.
+This project implements a FastAPI backend and a browser-based UI for a ServiceNow-style support accelerator. The solution now includes:
 
-The current implementation is chat-oriented:
-- the frontend shows a chat conversation
-- the backend maintains per-user conversation state
-- the bot asks follow-up questions to diagnose the issue
-- once enough information is collected, it creates an incident and returns a mitigation summary
+- **Conversational chat bot** for incident creation and diagnosis
+- **Prioritized ticket dashboard**: View open ServiceNow tickets, prioritized and explained by OpenAI, with mitigation plans
+- **OpenAI-powered prioritization and mitigation**: Uses LLMs to rank tickets and generate root cause/mitigation for new issues
+- **Historical ticket similarity**: Finds and summarizes mitigations from past incidents
+- **ServiceNow integration**: Create and read incidents via REST API
+- **CI/CD**: Automated build, deploy, and infrastructure provisioning with GitHub Actions and Terraform
+
+The frontend now has two main features:
+- Chat conversation for new issues
+- Live dashboard of prioritized open tickets with mitigation plans
+
 
 ## Folder structure
-- `backend/` — FastAPI app, bot logic, ServiceNow integration, session state, summarization
-- `frontend/` — static HTML chat UI
+- `backend/` — FastAPI app, bot logic, ServiceNow integration, session state, OpenAI, prioritization, mitigation
+- `frontend/` — static HTML chat UI and ticket dashboard
+- `terraform/` — AWS infrastructure as code
+- `.github/workflows/` — CI/CD pipeline for build and deploy
 
 ## Prerequisites
 - Python 3.10+ installed
@@ -36,6 +37,7 @@ pip install -r requirements.txt
 
 If you are missing `uvicorn`, install it with the same command above.
 
+
 ## Run locally
 From `Support-assisstant/backend`:
 
@@ -49,6 +51,13 @@ Then open:
 http://127.0.0.1:8000
 ```
 
+To view prioritized tickets and mitigation plans, use the dashboard in the UI or call:
+
+```http
+GET /tickets/prioritized
+```
+
+
 ## Environment variables
 For full integration, set these variables before running the backend:
 
@@ -57,18 +66,25 @@ $env:SN_INSTANCE_URL = "https://<your-instance>.service-now.com"
 $env:SN_USER = "your_username"
 $env:SN_PASS = "your_password"
 $env:OPENAI_API_KEY = "sk-..."
+$env:OPENAI_MODEL = "gpt-3.5-turbo"  # optional
+$env:OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"  # optional
 ```
 
-If `SN_INSTANCE_URL`, `SN_USER`, or `SN_PASS` are not set, the app returns a mock incident ID.
-If `OPENAI_API_KEY` is not set, mitigation summary falls back to the local historical resolution formatter.
+If ServiceNow or OpenAI variables are not set, the app falls back to mock or local logic.
 
 ## Local environment support
 The backend now supports a `.env` file in `backend/` when you install `python-dotenv`.
 A sample file is provided as `backend/.env.example`.
 
+
 ## Data and persistence improvements
-- `backend/session.py` now persists session state in `backend/sessions.db`.
-- `backend/similarity.py` uses fuzzy matching instead of simple keyword lookup.
+- `backend/session.py` persists session state in SQLite (or can be extended to DynamoDB/RDS)
+- `backend/similarity.py` uses fuzzy matching for similar tickets
+
+
+## CI/CD and Deployment
+- See `.github/workflows/deploy.yml` for a full GitHub Actions pipeline: builds Docker, pushes to ECR, applies Terraform, syncs frontend to S3, and invalidates CloudFront
+- See `terraform/` for AWS infrastructure: ECS, S3, CloudFront, RDS/DynamoDB, Secrets Manager, ALB, etc.
 
 ## ServiceNow Virtual Agent integration
 Use a Virtual Agent topic in ServiceNow to collect:

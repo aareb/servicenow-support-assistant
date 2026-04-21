@@ -91,12 +91,41 @@
       <input id="msg" placeholder="Type your issue here..." autocomplete="off" />
       <button id="sendBtn" onclick="send()">Send</button>
     </div>
+    <hr style="margin:32px 0;">
+    <h3>Prioritized Open Tickets</h3>
+    <button id="refreshTicketsBtn">Refresh Tickets</button>
+    <div id="tickets"></div>
+    <hr style="margin:32px 0;">
+    <h3>Weekly Incident Report</h3>
+    <button id="showReportBtn">Show Weekly Report</button>
+    <div id="weeklyReport"></div>
+      const showReportBtn = document.getElementById("showReportBtn");
+      const weeklyReportEl = document.getElementById("weeklyReport");
+
+      showReportBtn.addEventListener("click", loadWeeklyReport);
+
+      async function loadWeeklyReport() {
+        weeklyReportEl.innerHTML = "<em>Loading weekly report...</em>";
+        try {
+          const res = await fetch("/reports/weekly");
+          if (!res.ok) throw new Error("Not found");
+          const data = await res.json();
+          let html = `<b>Generated at:</b> ${data.generated_at || ''}<br><br>`;
+          html += `<b>Summary by Priority & Status:</b><br><pre style='background:#f8fafc; border-radius:6px; padding:8px; border:1px solid #eee;'>${JSON.stringify(data.summary, null, 2)}</pre>`;
+          weeklyReportEl.innerHTML = html;
+        } catch (e) {
+          weeklyReportEl.innerHTML = "<em>Weekly report not found or failed to load.</em>";
+        }
+      }
   </div>
 
   <script>
     const chatEl = document.getElementById("chat");
     const msgEl = document.getElementById("msg");
     const sendBtn = document.getElementById("sendBtn");
+
+    const ticketsEl = document.getElementById("tickets");
+    const refreshTicketsBtn = document.getElementById("refreshTicketsBtn");
 
     msgEl.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
@@ -113,11 +142,53 @@
       wrapper.appendChild(bubble);
       chatEl.appendChild(wrapper);
       chatEl.scrollTop = chatEl.scrollHeight;
+      // If user asks for weekly report, auto-load it in chat
+      if (role === "user" && /weekly report|incident report/i.test(text)) {
+        showWeeklyReportInChat();
+      }
+    }
+
+    async function showWeeklyReportInChat() {
+      addMessage("bot", "Fetching the latest weekly incident report...");
+      try {
+        const res = await fetch("/reports/weekly");
+        if (!res.ok) throw new Error("Not found");
+        const data = await res.json();
+        let summary = JSON.stringify(data.summary, null, 2);
+        let msg = `Weekly Incident Report (generated at ${data.generated_at || ''}):\n\nSummary by Priority & Status:\n${summary}`;
+        addMessage("bot", msg);
+      } catch (e) {
+        addMessage("bot", "Weekly report not found or failed to load.");
+      }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
       addMessage("bot", "Hello! I can help you diagnose the issue and create a ServiceNow incident. Please describe the problem you are seeing.");
+      loadTickets();
     });
+    refreshTicketsBtn.addEventListener("click", loadTickets);
+
+    async function loadTickets() {
+      ticketsEl.innerHTML = "<em>Loading open tickets...</em>";
+      try {
+        const res = await fetch("/tickets/prioritized");
+        const data = await res.json();
+        if (!data.tickets || !data.tickets.length) {
+          ticketsEl.innerHTML = "<em>No open tickets found.</em>";
+          return;
+        }
+        ticketsEl.innerHTML = data.tickets.map(t => `
+          <div style='border:1px solid #d2d6dc; border-radius:8px; margin-bottom:18px; padding:14px; background:#f8fafc;'>
+            <strong>#${t.number || ''}:</strong> ${t.short_description || ''}<br>
+            <b>Priority:</b> ${t.assigned_priority || t.priority || 'N/A'}
+            ${t.reason ? `<br><b>Reason:</b> ${t.reason}` : ''}
+            <br><b>Mitigation:</b><br><pre style='white-space:pre-wrap; background:#fff; border-radius:6px; padding:8px; border:1px solid #eee;'>${t.mitigation || ''}</pre>
+          </div>
+        `).join('');
+      } catch (e) {
+        ticketsEl.innerHTML = "<em>Failed to load tickets.</em>";
+      }
+    }
 
     async function send() {
       const message = msgEl.value.trim();

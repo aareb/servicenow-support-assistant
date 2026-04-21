@@ -11,6 +11,7 @@
 -  Start backend: `uvicorn main:app --reload`
 -  Open browser to `http://127.0.0.1:8000`
 
+
 ## Demo Flow (10 minutes)
 -  Show welcome message in chat UI
 -  Type issue description: "Login page fails after deployment"
@@ -19,18 +20,22 @@
 -  Answer CI: "Authentication service"
 -  Show incident creation response with priority and mitigation
 -  Demonstrate reset: Type "reset" and start new issue
+-  **Show prioritized open tickets dashboard**: Click "Refresh Tickets" to display open ServiceNow tickets, their AI-assigned priorities, reasons, and mitigation plans
+
 
 ## Key Features to Highlight
 -  Chat-oriented diagnosis (not form-based)
 -  Persistent session state (survives restarts)
 -  Fuzzy similarity matching to historical tickets
 -  ServiceNow incident creation (mock or real)
+-  **Prioritized ticket dashboard with OpenAI-powered triage and mitigation**
 -  AI summarization (if OpenAI key provided)
 -  Clean web UI for end-user experience
 
+
 ## Post-Demo Notes
 -  Mention accelerator nature: Ready for ServiceNow VA integration
--  Reference docs: `backend/README.md`, `servicenow_rest_action_example.md`
+-  Reference docs: `README.md`, `aws_deployment_plan.md`, `.github/workflows/deploy.yml`
 -  Note production hardening needed: Security, logging, etc.
 
 ## Troubleshooting
